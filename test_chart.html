@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图表修复测试</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+</head>
+<body>
+    <div class="container" style="padding: 20px;">
+        <h1>图表修复测试页面</h1>
+        
+        <div style="margin-bottom: 20px;">
+            <button onclick="testPieChart()">测试饼图</button>
+            <button onclick="testLineChart()">测试折线图</button>
+            <button onclick="testBarChart()">测试柱状图</button>
+        </div>
+        
+        <div class="chart-section" style="height: 600px;">
+            <div class="chart-container">
+                <canvas id="testChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let testChart;
+        
+        // 注册插件
+        if (typeof Chart !== 'undefined' && Chart.register) {
+            Chart.register(Chart.Annotation);
+        }
+        
+        function testPieChart() {
+            if (testChart) {
+                testChart.destroy();
+            }
+            
+            const ctx = document.getElementById('testChart').getContext('2d');
+            testChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['数据A', '数据B', '数据C', '数据D', '数据E'],
+                    datasets: [{
+                        data: [30, 25, 20, 15, 10],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'center',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                font: {
+                                    size: 14
+                                },
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    if (data.labels.length && data.datasets.length) {
+                                        const dataset = data.datasets[0];
+                                        const total = dataset.data.reduce((sum, val) => sum + val, 0);
+                                        
+                                        return data.labels.map((label, i) => {
+                                            const value = dataset.data[i];
+                                            const percentage = ((value / total) * 100).toFixed(1);
+                                            
+                                            return {
+                                                text: `${label}: ${value} (${percentage}%)`,
+                                                fillStyle: dataset.backgroundColor[i],
+                                                strokeStyle: dataset.borderColor[i],
+                                                lineWidth: dataset.borderWidth,
+                                                hidden: false,
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                    return [];
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '饼图示例',
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 30
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function testLineChart() {
+            if (testChart) {
+                testChart.destroy();
+            }
+            
+            const ctx = document.getElementById('testChart').getContext('2d');
+            testChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                    datasets: [{
+                        label: '销售额',
+                        data: [12, 19, 3, 15, 8, 25],
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'center',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '折线图示例',
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 30
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function testBarChart() {
+            if (testChart) {
+                testChart.destroy();
+            }
+            
+            const ctx = document.getElementById('testChart').getContext('2d');
+            testChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['产品A', '产品B', '产品C', '产品D', '产品E'],
+                    datasets: [{
+                        label: '销量',
+                        data: [65, 45, 80, 35, 55],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(153, 102, 255, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'center',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '柱状图示例',
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 30
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 页面加载完成后显示饼图
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                testPieChart();
+            }, 200);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        select, input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>数据可视化测试</h1>
+        
+        <div>
+            <label>图表类型：</label>
+            <select id="chartType">
+                <option value="bar">柱状图</option>
+                <option value="line">折线图</option>
+                <option value="pie">饼图</option>
+                <option value="doughnut">环形图</option>
+            </select>
+        </div>
+        
+        <div>
+            <label>数据标签：</label>
+            <input type="text" id="labels" value="A,B,C,D,E" placeholder="逗号分隔">
+        </div>
+        
+        <div>
+            <label>数据值：</label>
+            <input type="text" id="values" value="10,20,30,40,50" placeholder="逗号分隔">
+        </div>
+        
+        <button onclick="updateChart()">更新图表</button>
+        <button onclick="loadSample()">加载示例数据</button>
+        
+        <div class="chart-container">
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        let myChart = null;
+        
+        function updateChart() {
+            const type = document.getElementById('chartType').value;
+            const labels = document.getElementById('labels').value.split(',');
+            const values = document.getElementById('values').value.split(',').map(Number);
+            
+            const ctx = document.getElementById('myChart').getContext('2d');
+            
+            if (myChart) {
+                myChart.destroy();
+            }
+            
+            myChart = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '数据',
+                        data: values,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(153, 102, 255, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+        
+        function loadSample() {
+            document.getElementById('labels').value = '电影A,电影B,电影C,电影D,电影E';
+            document.getElementById('values').value = '48.57,46.18,42.05,21.83,17.03';
+            document.getElementById('chartType').value = 'bar';
+            updateChart();
+        }
+        
+        // 页面加载时初始化
+        window.onload = updateChart;
+    </script>
+</body>
+</html>

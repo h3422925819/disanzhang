@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据可视化 - 现代交互式图表</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 顶部导航 -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <h1>📊 数据可视化</h1>
+                    <p>现代交互式图表展示平台</p>
+                </div>
+                <div class="header-actions">
+                    <button class="theme-toggle" id="themeToggle">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主要内容区域 -->
+        <main class="app-main">
+            <div class="layout-grid">
+                <!-- 控制面板 -->
+                <aside class="control-panel">
+                <div class="panel-header">
+                    <h2>⚙️ 图表配置</h2>
+                </div>
+                    
+                    <div class="panel-content">
+                        <!-- 图表类型选择 -->
+                        <div class="control-section">
+                            <div class="section-title">图表类型</div>
+                            <div class="chart-type-selector">
+                                <select id="chartType" class="chart-select">
+                                    <option value="bar">📊 柱状图</option>
+                                    <option value="line">📈 折线图</option>
+                                    <option value="pie">🥧 饼图</option>
+                                    <option value="doughnut">🍩 环形图</option>
+                                    <option value="scatter">⚡ 散点图</option>
+                                    <option value="radar">🎯 雷达图</option>
+                                    <option value="polarArea">🌐 极坐标图</option>
+                                    <option value="sineCosine">〰️ 正弦余弦函数</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 样式设置 -->
+                        <div class="control-section">
+                            <div class="section-title">样式设置</div>
+                            
+                            <div class="style-controls">
+                                <div class="control-item">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="showGrid" checked>
+                                        <span class="toggle-slider"></span>
+                                        <span class="toggle-label">显示网格</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="control-item">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="showReferenceLine">
+                                        <span class="toggle-slider"></span>
+                                        <span class="toggle-label">参考线</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="control-item">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="showReferenceArea">
+                                        <span class="toggle-slider"></span>
+                                        <span class="toggle-label">参考区域</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="control-item">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="showAnnotation">
+                                        <span class="toggle-slider"></span>
+                                        <span class="toggle-label">注释标记</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="control-item">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="showTable">
+                                        <span class="toggle-slider"></span>
+                                        <span class="toggle-label">显示表格</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label>网格样式</label>
+                                <select id="gridStyle" class="modern-select">
+                                    <option value="solid">实线</option>
+                                    <option value="dashed">虚线</option>
+                                    <option value="dotted">点线</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 数据输入 -->
+                        <div class="control-section">
+                            <div class="section-title">数据配置</div>
+                            
+                            <div class="data-controls">
+                                <div class="control-group">
+                                    <label>图表标题</label>
+                                    <input type="text" id="chartTitle" class="modern-input" placeholder="输入图表标题" value="数据可视化示例">
+                                </div>
+                                
+                                <div class="control-group">
+                                    <label>数据标签</label>
+                                    <input type="text" id="dataLabels" class="modern-input" placeholder="项目1,项目2,项目3" value="类别1,类别2,类别3,类别4,类别5">
+                                </div>
+                                
+                                <div class="control-group">
+                                    <label>数据值</label>
+                                    <input type="text" id="dataValues" class="modern-input" placeholder="10,20,30,40,50" value="12,19,3,15,8">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 操作按钮 -->
+                        <div class="control-section">
+                            <div class="action-buttons">
+                                <button id="updateChart" class="btn-primary">
+                                    <span class="btn-icon">🔄</span>
+                                    更新图表
+                                </button>
+                                <button id="resetData" class="btn-outline">
+                                    <span class="btn-icon">↺</span>
+                                    重置数据
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- 图表显示区域 -->
+                <section class="chart-display">
+                    <div class="chart-header">
+                        <h2 id="chartTitleDisplay">数据可视化示例</h2>
+                        <div class="chart-actions">
+                            <button class="action-btn" id="downloadChart" title="下载图表">
+                                <span>💾</span>
+                            </button>
+                            <button class="action-btn" id="fullscreenChart" title="全屏">
+                                <span>⛶</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="myChart"></canvas>
+                    </div>
+                    
+                    <div class="data-table-container" id="dataTableContainer" style="display: none;">
+                        <h3>数据表格</h3>
+                        <div id="dataTable"></div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/app-enhanced.js"></script>
+</body>
+</html>

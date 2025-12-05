@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第3章 - 图例控制演示</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .control-group {
+            display: inline-block;
+            margin: 0 20px 15px 0;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            margin-right: 10px;
+            color: #374151;
+        }
+
+        select {
+            padding: 8px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            color: #1f2937;
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .checkbox-container {
+            display: inline-flex;
+            align-items: center;
+            margin: 0 20px 15px 0;
+            cursor: pointer;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .chart-container {
+            padding: 30px;
+            height: 500px;
+            position: relative;
+        }
+
+        .info-box {
+            background: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 20px 30px;
+            border-radius: 8px;
+        }
+
+        .info-box h3 {
+            margin: 0 0 10px 0;
+            color: #1e40af;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .button-group {
+            padding: 20px 30px;
+            text-align: center;
+            background: #f8fafc;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>第3章 - 图例控制演示</h1>
+            <p>基于matplotlib图例控制的Web版本演示</p>
+        </header>
+
+        <div class="info-box">
+            <h3>📚 本章学习重点</h3>
+            <p>本章主要讲解如何控制图表中图例的显示与位置，包括：显示/隐藏图例、调整图例位置、自定义图例样式等。在matplotlib中通过legend()函数的各种参数来实现，本演示展示了在Chart.js中的对应实现。</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="chartType">图表类型：</label>
+                <select id="chartType">
+                    <option value="line">折线图</option>
+                    <option value="bar">柱状图</option>
+                    <option value="pie">饼图</option>
+                    <option value="doughnut">环形图</option>
+                    <option value="radar">雷达图</option>
+                </select>
+            </div>
+
+            <div class="checkbox-container">
+                <label>
+                    <input type="checkbox" id="showLegend" checked>
+                    显示图例
+                </label>
+            </div>
+
+            <div class="control-group">
+                <label for="legendPosition">图例位置：</label>
+                <select id="legendPosition">
+                    <option value="top">顶部</option>
+                    <option value="bottom">底部</option>
+                    <option value="left">左侧</option>
+                    <option value="right">右侧</option>
+                </select>
+            </div>
+
+            <div class="checkbox-container">
+                <label>
+                    <input type="checkbox" id="showTitle" checked>
+                    显示标题
+                </label>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="myChart"></canvas>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-primary" onclick="loadSineCosine()">正弦余弦函数</button>
+            <button class="btn btn-primary" onclick="loadSalesData()">销售数据</button>
+            <button class="btn btn-primary" onclick="loadCategoryData()">分类数据</button>
+            <button class="btn btn-secondary" onclick="updateChart()">更新图表</button>
+        </div>
+    </div>
+
+    <script>
+        let myChart;
+
+        // 示例数据
+        const sineCosineData = {
+            labels: [],
+            datasets: [
+                {
+                    label: 'sin(x)',
+                    data: [],
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.4,
+                    fill: false
+                },
+                {
+                    label: 'cos(x)',
+                    data: [],
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.4,
+                    fill: false
+                }
+            ]
+        };
+
+        const salesData = {
+            labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+            datasets: [
+                {
+                    label: '产品A',
+                    data: [12, 19, 3, 5, 2, 3],
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                },
+                {
+                    label: '产品B',
+                    data: [15, 12, 8, 10, 6, 8],
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                }
+            ]
+        };
+
+        const categoryData = {
+            labels: ['电子产品', '服装', '食品', '家居', '图书'],
+            datasets: [{
+                label: '销售额（万元）',
+                data: [65, 59, 80, 81, 56],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 206, 86, 0.8)',
+                    'rgba(75, 192, 192, 0.8)',
+                    'rgba(153, 102, 255, 0.8)'
+                ],
+                borderWidth: 2
+            }]
+        };
+
+        // 初始化正弦余弦数据
+        function initSineCosineData() {
+            for (let i = 0; i <= 20; i++) {
+                const angle = (i / 20) * 2 * Math.PI;
+                sineCosineData.labels.push(i.toFixed(1));
+                sineCosineData.datasets[0].data.push(Math.sin(angle));
+                sineCosineData.datasets[1].data.push(Math.cos(angle));
+            }
+        }
+
+        // 获取当前图表配置
+        function getCurrentConfig() {
+            const chartType = document.getElementById('chartType').value;
+            const showLegend = document.getElementById('showLegend').checked;
+            const legendPosition = document.getElementById('legendPosition').value;
+            const showTitle = document.getElementById('showTitle').checked;
+
+            let data;
+            if (window.currentData === 'sineCosine') {
+                data = JSON.parse(JSON.stringify(sineCosineData));
+            } else if (window.currentData === 'sales') {
+                data = JSON.parse(JSON.stringify(salesData));
+            } else {
+                data = JSON.parse(JSON.stringify(categoryData));
+            }
+
+            const config = {
+                type: chartType,
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: showLegend,
+                            position: legendPosition
+                        },
+                        title: {
+                            display: showTitle,
+                            text: '图例控制演示',
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    scales: (chartType === 'pie' || chartType === 'doughnut') ? {} : {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            };
+
+            return config;
+        }
+
+        // 更新图表
+        function updateChart() {
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            const ctx = document.getElementById('myChart').getContext('2d');
+            myChart = new Chart(ctx, getCurrentConfig());
+        }
+
+        // 加载不同数据
+        function loadSineCosine() {
+            window.currentData = 'sineCosine';
+            updateChart();
+        }
+
+        function loadSalesData() {
+            window.currentData = 'sales';
+            updateChart();
+        }
+
+        function loadCategoryData() {
+            window.currentData = 'category';
+            updateChart();
+        }
+
+        // 事件监听器
+        document.getElementById('chartType').addEventListener('change', updateChart);
+        document.getElementById('showLegend').addEventListener('change', updateChart);
+        document.getElementById('legendPosition').addEventListener('change', updateChart);
+        document.getElementById('showTitle').addEventListener('change', updateChart);
+
+        // 初始化
+        window.addEventListener('load', () => {
+            initSineCosineData();
+            window.currentData = 'sineCosine';
+            updateChart();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单图表测试</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container" style="padding: 20px;">
+        <h1>简单图表测试</h1>
+        
+        <div class="chart-section" style="height: 600px;">
+            <div class="chart-container">
+                <canvas id="testChart"></canvas>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button onclick="loadChartData()">加载示例数据</button>
+            <button onclick="toggleLegend()">切换图例</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        let testChart;
+        
+        function loadChartData() {
+            if (testChart) {
+                testChart.destroy();
+            }
+            
+            const ctx = document.getElementById('testChart').getContext('2d');
+            
+            testChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['哪吒之魔童降世', '流浪地球', '复仇者联盟4', '疯狂的外星人', '飞驰人生'],
+                    datasets: [{
+                        label: '票房（亿元）',
+                        data: [48.57, 46.18, 42.05, 21.83, 17.03],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(153, 102, 255, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'center',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '2019年内地电影票房排行榜',
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 30
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += context.parsed.y + ' 亿元';
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '票房（亿元）'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+        }
+        
+        function toggleLegend() {
+            if (testChart) {
+                testChart.options.plugins.legend.display = !testChart.options.plugins.legend.display;
+                testChart.update();
+            }
+        }
+        
+        // 页面加载完成后自动加载图表
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面加载完成，准备加载图表');
+            setTimeout(() => {
+                loadChartData();
+            }, 100);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图例控制测试</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container" style="padding: 20px;">
+        <h1>统一图例控制测试</h1>
+        
+        <div class="controls-section" style="margin-bottom: 30px;">
+            <div class="control-group">
+                <label class="legend-control-label">图例控制：</label>
+                <div class="legend-control-container">
+                    <button id="legendToggle" class="legend-toggle-btn active">
+                        <span class="legend-icon">📊</span>
+                        <span class="legend-text">显示图例</span>
+                    </button>
+                    <div class="legend-options show" id="legendOptions">
+                        <div class="option-group">
+                            <label class="option-label">位置：</label>
+                            <div class="position-buttons">
+                                <button class="pos-btn active" data-position="top">顶部</button>
+                                <button class="pos-btn" data-position="bottom">底部</button>
+                                <button class="pos-btn" data-position="left">左侧</button>
+                                <button class="pos-btn" data-position="right">右侧</button>
+                            </div>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">样式：</label>
+                            <div class="style-buttons">
+                                <button class="style-btn active" data-style="default">默认</button>
+                                <button class="style-btn" data-style="compact">紧凑</button>
+                                <button class="style-btn" data-style="detailed">详细</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chart-section" style="height: 500px;">
+            <div class="chart-container">
+                <canvas id="testChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        let testChart;
+        let legendState = {
+            visible: true,
+            position: 'top',
+            style: 'default'
+        };
+        
+        // 初始化图例控制
+        function initLegendControls() {
+            const legendToggle = document.getElementById('legendToggle');
+            const legendOptions = document.getElementById('legendOptions');
+            const positionButtons = document.querySelectorAll('.pos-btn');
+            const styleButtons = document.querySelectorAll('.style-btn');
+            
+            // 主按钮点击事件
+            legendToggle.addEventListener('click', function() {
+                legendState.visible = !legendState.visible;
+                updateLegendToggleUI();
+                updateChart();
+            });
+            
+            // 位置按钮点击事件
+            positionButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    positionButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    legendState.position = this.dataset.position;
+                    if (!legendState.visible) {
+                        legendState.visible = true;
+                        updateLegendToggleUI();
+                    }
+                    updateChart();
+                });
+            });
+            
+            // 样式按钮点击事件
+            styleButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    styleButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    legendState.style = this.dataset.style;
+                    if (!legendState.visible) {
+                        legendState.visible = true;
+                        updateLegendToggleUI();
+                    }
+                    updateChart();
+                });
+            });
+        }
+        
+        // 更新图例切换按钮UI
+        function updateLegendToggleUI() {
+            const legendToggle = document.getElementById('legendToggle');
+            const legendOptions = document.getElementById('legendOptions');
+            const legendText = legendToggle.querySelector('.legend-text');
+            const legendIcon = legendToggle.querySelector('.legend-icon');
+            
+            if (legendState.visible) {
+                legendToggle.classList.remove('inactive');
+                legendToggle.classList.add('active');
+                legendText.textContent = '隐藏图例';
+                legendIcon.textContent = '📊';
+                legendOptions.classList.add('show');
+            } else {
+                legendToggle.classList.remove('active');
+                legendToggle.classList.add('inactive');
+                legendText.textContent = '显示图例';
+                legendIcon.textContent = '📈';
+                legendOptions.classList.remove('show');
+            }
+        }
+        
+        // 更新图表容器样式
+        function updateChartContainerStyle() {
+            const chartContainer = document.querySelector('.chart-container');
+            chartContainer.classList.remove('compact-legend', 'detailed-legend');
+            
+            if (legendState.style === 'compact') {
+                chartContainer.classList.add('compact-legend');
+            } else if (legendState.style === 'detailed') {
+                chartContainer.classList.add('detailed-legend');
+            }
+        }
+        
+        // 创建图表
+        function createChart() {
+            const ctx = document.getElementById('testChart').getContext('2d');
+            
+            testChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['哪吒之魔童降世', '流浪地球', '复仇者联盟4', '疯狂的外星人', '飞驰人生'],
+                    datasets: [{
+                        label: '票房（亿元）',
+                        data: [48.57, 46.18, 42.05, 21.83, 17.03],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(153, 102, 255, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: legendState.visible,
+                            position: legendState.position,
+                            align: 'center',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '2019年内地电影票房排行榜',
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 30
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '票房（亿元）'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 更新图表
+        function updateChart() {
+            if (!testChart) return;
+            
+            updateChartContainerStyle();
+            
+            testChart.options.plugins.legend.display = legendState.visible;
+            testChart.options.plugins.legend.position = legendState.position;
+            testChart.update();
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initLegendControls();
+                createChart();
+            }, 100);
+        });
+    </script>
+</body>
+</html>

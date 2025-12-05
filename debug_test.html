@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调试测试页面</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+</head>
+<body>
+    <div class="container" style="padding: 20px;">
+        <h1>调试测试页面</h1>
+        <div id="debug-info" style="background: #f0f0f0; padding: 10px; margin-bottom: 20px;"></div>
+        
+        <div class="chart-section" style="height: 500px;">
+            <div class="chart-container">
+                <canvas id="debugChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 调试信息
+        function updateDebugInfo() {
+            const debugDiv = document.getElementById('debug-info');
+            const info = [
+                'Chart.js: ' + (typeof Chart !== 'undefined' ? '✓ 已加载' : '✗ 未加载'),
+                'Chart.Annotation: ' + (typeof Chart !== 'undefined' && Chart.Annotation ? '✓ 已加载' : '✗ 未加载'),
+                'Canvas: ' + (document.getElementById('debugChart') ? '✓ 已找到' : '✗ 未找到')
+            ];
+            debugDiv.innerHTML = info.join('<br>');
+        }
+        
+        // 注册插件
+        if (typeof Chart !== 'undefined' && Chart.Annotation) {
+            Chart.register(Chart.Annotation);
+        }
+        
+        // 创建测试图表
+        function createTestChart() {
+            updateDebugInfo();
+            
+            const canvas = document.getElementById('debugChart');
+            if (!canvas) {
+                console.error('Canvas元素未找到');
+                return;
+            }
+            
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('无法获取Canvas上下文');
+                return;
+            }
+            
+            try {
+                const testChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['A', 'B', 'C', 'D', 'E'],
+                        datasets: [{
+                            label: '测试数据',
+                            data: [10, 20, 30, 40, 50],
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                align: 'center'
+                            },
+                            title: {
+                                display: true,
+                                text: '测试图表'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                
+                console.log('图表创建成功');
+                updateDebugInfo();
+                
+            } catch (error) {
+                console.error('创建图表失败:', error);
+                const debugDiv = document.getElementById('debug-info');
+                debugDiv.innerHTML += '<br><strong style="color: red;">图表创建失败: ' + error.message + '</strong>';
+            }
+        }
+        
+        // 页面加载完成后创建图表
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM加载完成');
+            setTimeout(createTestChart, 200);
+        });
+    </script>
+</body>
+</html>

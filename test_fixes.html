@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>功能测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .test-button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
+        #myChart { max-width: 800px; height: 400px; margin: 20px 0; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+</head>
+<body>
+    <h1>数据可视化功能测试</h1>
+    
+    <div class="test-section">
+        <h2>测试图表类型</h2>
+        <button class="test-button" onclick="testChart('movieBoxOffice')">电影票房排行榜</button>
+        <button class="test-button" onclick="testChart('randomScatter')">随机散点分布</button>
+        <button class="test-button" onclick="testChart('histogram')">直方图</button>
+        <button class="test-button" onclick="testChart('sineCosine')">正弦余弦函数</button>
+        
+        <div style="margin: 10px 0;">
+            <label><input type="checkbox" id="showGrid" checked> 显示网格</label>
+            <label><input type="checkbox" id="showReferenceLine"> 显示参考线</label>
+            <label><input type="checkbox" id="showReferenceArea"> 显示参考区域</label>
+            <label><input type="checkbox" id="showAnnotation"> 显示注释</label>
+        </div>
+    </div>
+    
+    <canvas id="myChart"></canvas>
+
+    <script>
+        // 电影票房数据
+        const movieData = {
+            labels: ['哪吒之魔童降世', '流浪地球', '复仇者联盟4', '疯狂的外星人', '飞驰人生'],
+            values: [48.57, 46.18, 42.05, 21.83, 17.03],
+            title: '2019年内地电影票房排行榜（亿元）'
+        };
+
+        // 正弦余弦数据
+        const trigData = {
+            labels: [],
+            sineValues: [],
+            cosineValues: [],
+            title: '正弦余弦函数对比'
+        };
+
+        // 初始化正弦余弦数据
+        function initTrigData() {
+            const x = [];
+            const sineValues = [];
+            const cosineValues = [];
+            
+            for (let i = 0; i <= 20; i++) {
+                const angle = (i / 20) * 2 * Math.PI;
+                x.push(i);
+                sineValues.push(Math.sin(angle));
+                cosineValues.push(Math.cos(angle));
+            }
+            
+            trigData.labels = x;
+            trigData.sineValues = sineValues;
+            trigData.cosineValues = cosineValues;
+        }
+
+        // 注册注释插件
+        try {
+            if (typeof window !== 'undefined' && window.ChartAnnotation) {
+                Chart.register(window.ChartAnnotation);
+                console.log('注释插件已注册 (window.ChartAnnotation)');
+            } else if (typeof Chart !== 'undefined' && Chart.Annotation) {
+                Chart.register(Chart.Annotation);
+                console.log('注释插件已注册 (Chart.Annotation)');
+            } else {
+                console.warn('注释插件未找到');
+            }
+        } catch (error) {
+            console.warn('注释插件注册失败:', error);
+        }
+
+        let myChart = null;
+
+        function testChart(type) {
+            if (myChart) {
+                myChart.destroy();
+                myChart = null;
+            }
+
+            const ctx = document.getElementById('myChart').getContext('2d');
+            const showGrid = document.getElementById('showGrid').checked;
+            const showReferenceLine = document.getElementById('showReferenceLine').checked;
+            const showReferenceArea = document.getElementById('showReferenceArea').checked;
+            const showAnnotation = document.getElementById('showAnnotation').checked;
+
+            let config = {};
+
+            switch (type) {
+                case 'movieBoxOffice':
+                    config = {
+                        type: 'bar',
+                        data: {
+                            labels: movieData.labels,
+                            datasets: [{
+                                label: '票房（亿元）',
+                                data: movieData.values,
+                                backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: movieData.title,
+                                    font: { size: 16, weight: 'bold' }
+                                }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    };
+                    break;
+
+                case 'randomScatter':
+                    const scatterData = [];
+                    for (let i = 0; i < 50; i++) {
+                        scatterData.push({
+                            x: Math.random() * 100,
+                            y: Math.random() * 100
+                        });
+                    }
+                    config = {
+                        type: 'scatter',
+                        data: {
+                            datasets: [{
+                                label: '随机分布点',
+                                data: scatterData,
+                                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                                borderColor: 'rgba(75, 192, 192, 1)'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: '随机散点分布',
+                                    font: { size: 16, weight: 'bold' }
+                                }
+                            }
+                        }
+                    };
+                    break;
+
+                case 'histogram':
+                    const histData = [];
+                    const histLabels = [];
+                    for (let i = 0; i < 10; i++) {
+                        histLabels.push(`${i*10}-${(i+1)*10}`);
+                        histData.push(Math.floor(Math.random() * 50) + 10);
+                    }
+                    config = {
+                        type: 'bar',
+                        data: {
+                            labels: histLabels,
+                            datasets: [{
+                                label: '频数',
+                                data: histData,
+                                backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                                borderColor: 'rgba(153, 102, 255, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: '数据直方图',
+                                    font: { size: 16, weight: 'bold' }
+                                }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    };
+                    break;
+
+                case 'sineCosine':
+                    config = {
+                        type: 'line',
+                        data: {
+                            labels: trigData.labels,
+                            datasets: [
+                                {
+                                    label: 'sin(x)',
+                                    data: trigData.sineValues,
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                    tension: 0.4,
+                                    fill: false
+                                },
+                                {
+                                    label: 'cos(x)',
+                                    data: trigData.cosineValues,
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                    tension: 0.4,
+                                    fill: false
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: trigData.title,
+                                    font: { size: 16, weight: 'bold' }
+                                }
+                            }
+                        }
+                    };
+                    break;
+            }
+
+            // 添加注释、参考线和参考区域
+            if (showAnnotation || showReferenceLine || showReferenceArea) {
+                if (!config.options.plugins) config.options.plugins = {};
+                
+                const annotations = {};
+                
+                // 参考线
+                if (showReferenceLine) {
+                    if (type === 'scatter') {
+                        annotations.hLine = {
+                            type: 'line',
+                            xMin: 50,
+                            xMax: 50,
+                            borderColor: 'rgb(255, 99, 132)',
+                            borderWidth: 2,
+                            borderDash: [6, 6],
+                            label: {
+                                content: '垂直中心线',
+                                display: true,
+                                position: 'end',
+                                backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                                color: 'white'
+                            }
+                        };
+                    } else {
+                        annotations.hLine = {
+                            type: 'line',
+                            yMin: 25,
+                            yMax: 25,
+                            borderColor: 'rgb(255, 99, 132)',
+                            borderWidth: 2,
+                            borderDash: [6, 6],
+                            label: {
+                                content: '水平参考线',
+                                display: true,
+                                position: 'end',
+                                backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                                color: 'white'
+                            }
+                        };
+                    }
+                }
+                
+                // 参考区域
+                if (showReferenceArea) {
+                    if (type === 'scatter') {
+                        annotations.refArea = {
+                            type: 'box',
+                            xMin: 30,
+                            xMax: 70,
+                            yMin: 30,
+                            yMax: 70,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            label: {
+                                content: '目标区域',
+                                display: true,
+                                position: 'center',
+                                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                                color: 'white'
+                            }
+                        };
+                    } else {
+                        annotations.refArea = {
+                            type: 'box',
+                            yMin: 20,
+                            yMax: 35,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            label: {
+                                content: '目标区间',
+                                display: true,
+                                position: 'center',
+                                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                                color: 'white'
+                            }
+                        };
+                    }
+                }
+                
+                // 注释
+                if (showAnnotation) {
+                    if (type === 'movieBoxOffice') {
+                        annotations.point1 = {
+                            type: 'point',
+                            xValue: 1,
+                            yValue: movieData.values[1],
+                            backgroundColor: 'rgba(255, 99, 132, 1)',
+                            radius: 8,
+                            label: {
+                                content: '高票房',
+                                display: true,
+                                position: 'top'
+                            }
+                        };
+                    } else if (type === 'scatter') {
+                        annotations.point1 = {
+                            type: 'point',
+                            xValue: 50,
+                            yValue: 50,
+                            backgroundColor: 'rgba(255, 99, 132, 1)',
+                            radius: 8,
+                            label: {
+                                content: '中心点',
+                                display: true,
+                                position: 'top'
+                            }
+                        };
+                    } else if (type === 'histogram') {
+                        annotations.point1 = {
+                            type: 'point',
+                            xValue: 4,
+                            yValue: 35,
+                            backgroundColor: 'rgba(255, 99, 132, 1)',
+                            radius: 8,
+                            label: {
+                                content: '峰值',
+                                display: true,
+                                position: 'top'
+                            }
+                        };
+                    } else {
+                        annotations.point1 = {
+                            type: 'point',
+                            xValue: 10,
+                            yValue: 0.5,
+                            backgroundColor: 'rgba(255, 99, 132, 1)',
+                            radius: 8,
+                            label: {
+                                content: '特征点',
+                                display: true,
+                                position: 'top'
+                            }
+                        };
+                    }
+                }
+                
+                config.options.plugins.annotation = {
+                    annotations: annotations
+                };
+                console.log('添加了注释配置，注释数量:', Object.keys(annotations).length);
+            }
+
+            myChart = new Chart(ctx, config);
+        }
+
+        // 初始化
+        initTrigData();
+        testChart('movieBoxOffice');
+    </script>
+</body>
+</html>
