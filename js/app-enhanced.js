@@ -1,6 +1,22 @@
 // 图表实例
 let myChart;
 
+// 显示错误信息
+function showError(message) {
+    const chartContainer = document.querySelector('.chart-container');
+    if (chartContainer) {
+        chartContainer.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #e74c3c;">
+                <h3>⚠️ 加载错误</h3>
+                <p>${message}</p>
+                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    重新加载页面
+                </button>
+            </div>
+        `;
+    }
+}
+
 // 当前数据
 let currentData = {
     labels: ['产品A', '产品B', '产品C', '产品D', '产品E'],
@@ -41,6 +57,7 @@ function init() {
     // 检查Chart.js是否加载
     if (typeof Chart === 'undefined') {
         console.error('Chart.js未加载');
+        showError('Chart.js库加载失败，请检查网络连接');
         return;
     }
     
